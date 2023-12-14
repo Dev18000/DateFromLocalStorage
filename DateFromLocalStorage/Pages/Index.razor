@@ -1,0 +1,32 @@
+﻿@page "/"
+
+<button @onclick=GetMyDate></button>
+
+@if (MyDateFromLocalStorage != null)
+{
+    <p>@MyDateFromLocalStorage</p>
+    <p>@textForDate</p>
+}
+
+
+
+@code {
+    DateTime? MyDate = DateTime.Now;
+    DateTime? MyDateFromLocalStorage = DateTime.Now.AddDays(-1);
+    string textForDate = "дата по умолчанию присвоена вчера(шняя)";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await LocalStorageService.SetSessionString("myDate", MyDate?.Ticks.ToString());
+    }
+
+    async Task GetMyDate()
+    {
+        var numberOfTicks = await LocalStorageService.GetSessionStringAsync<string>("myDate");
+        DateTime myDate = new DateTime((long)Convert.ToDouble(numberOfTicks));
+        MyDateFromLocalStorage = myDate;
+        textForDate = "дату взяли из хранилища";
+
+        StateHasChanged();
+    }
+}
